@@ -1,5 +1,4 @@
-require "defaulter/version"
+require 'defaulter/version'
+require 'defaulter/has_default'
 
-module Defaulter
-  # Your code goes here...
-end
+ActiveRecord::Base.extend(Defaulter::HasDefault)
