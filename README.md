@@ -11,10 +11,10 @@ For example, a `User` model can have many `Email` models using ActiveRecords `ha
 Put this in your project's Gemfile:
 
 ```ruby
-gem defaulter
+gem 'defaulter'
 ```
 
-Don't forget to run bundle to fetch the gem.
+Don't forget to run the `bundle` command to fetch the gem.
 
 ### Step 2
 
@@ -24,7 +24,7 @@ Next, you'll need to add one column to whichever table where you want to mark de
 t.boolean :prime, null: false, default: false
 ```
 
-If already have a migrations, you will need to create a new one and add the column like so:
+If already have a migration, you will need to create a new one and add the column like so:
 
 ```ruby
 add_column :table_name, :prime, null: false, default: false
@@ -36,7 +36,7 @@ Now, run the migrations.
 
 ### Step 3
 
-There's not *Step 3*. We're ready to roll.
+There's no *Step 3*. We're ready to roll.
 
 ## Configuration
 
