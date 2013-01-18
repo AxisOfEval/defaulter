@@ -4,6 +4,10 @@ Defaulter allows you to mark and maintain default objects in ActiveRecord associ
 
 For example, a `User` model can have many `Email` models using ActiveRecords `has_many` functionality. But which email address do you send mail to? Certainly not all, that's just irritating. Instead, marking a particular record as default and sending mail there is a much better idea. The defaulter gem allows you to achieve that rather simply.
 
+## Compatibility
+
+Defaulter works with Rails 4+. Backporting to Rails 3.2 is work in progress.
+
 ## Installation
 
 ### Step 1
@@ -84,7 +88,7 @@ I threw this gem together in about half an hour, there is scope for improvement.
 2. Ability the configure the name of the default column, by passing it with the `has_default` call like so: `has_default :email, default_column: :primordial`
 3. Dynamically generated utitlity instance methods like `default_email` and `default_address`
 4. Optionally, prevent default records from being destroyed
-5. Did I say tests?
+5. Backport to Rails 3.2
 
 ## License
 
