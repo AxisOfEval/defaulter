@@ -1,7 +1,11 @@
 module Defaulter
   module HasDefault
     def has_default(model, *args)
-      options = args.extract_options!
+      options     = args.extract_options!
+
+      def load_method
+        @@load_method ||= (Gem::Version.new('4.0.0beta') >= Gem::Version.new(Rails.version)) ? :all : :load
+      end
 
       has_many model.to_s.pluralize.to_sym, options do
 
@@ -10,7 +14,7 @@ module Defaulter
         end
 
         def default=(record)
-          records     = load
+          records     = self.send(load_method)
 
           if records.include?(record)
             ActiveRecord::Base.transaction do
@@ -24,12 +28,11 @@ module Defaulter
         end
 
         def << (models)
-          primes = nil
+          primes      = nil
 
           case models.class.name
           when 'Array'
-            puts 'cowabunga'
-            models.first.prime  = true if self.load.empty? && primes.empty? && !models.blank?
+            models.first.prime  = true if self.send(load_method).empty? && primes.empty? && !models.blank?
             primes              = models.select { |m| m.prime? }
             model               = models.delete(primes.last)
 
@@ -44,7 +47,7 @@ module Defaulter
             end
           else
             unless models.blank?
-              loaded       = !load.empty?
+              loaded       = !self.send(load_method).empty?
               models.prime = true unless loaded
 
               ActiveRecord::Base.transaction do
