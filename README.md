@@ -6,7 +6,7 @@ For example, a `User` model can have many `Email` models using ActiveRecords `ha
 
 ## Compatibility
 
-Defaulter works with Rails 4+. Backporting to Rails 3.2 is work in progress.
+Besides Rails 4 beta, defaulter now supports Rails 3.2. It **may work** on lower rails versions, but your mileage may vary.
 
 ## Installation
 
@@ -88,7 +88,7 @@ I threw this gem together in about half an hour, there is scope for improvement.
 2. Ability the configure the name of the default column, by passing it with the `has_default` call like so: `has_default :email, default_column: :primordial`
 3. Dynamically generated utitlity instance methods like `default_email` and `default_address`
 4. Optionally, prevent default records from being destroyed
-5. Backport to Rails 3.2
+5. ~~Backport to Rails 3.2~~ (v0.0.9)
 
 ## License
 
