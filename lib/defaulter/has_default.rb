@@ -1,58 +1,90 @@
 module Defaulter
   module HasDefault
     def has_default(model, *args)
-      options     = args.extract_options!
+      resource      = model.to_sym
+      options       = args.extract_options!
+      resources     = resource.to_s.pluralize.to_sym
+      column_name   = options.delete(:default_column) || :prime
+      column_setter = "#{column_name}=".to_sym
+
+      # Unused
+      # method        = "default_#{resource}_column".to_sym
+      # class_variable_set("@@#{method}".to_sym, column_name.freeze)
+      # define_singleton_method(method) { class_variable_get("@@#{method}".to_sym) }
 
       def load_method
-        @@load_method ||= (Gem::Version.new('4.0.0beta') >= Gem::Version.new(Rails.version)) ? :all : :load
+        @@load_method ||= (Gem::Version.new('4.0.0') >=
+          Gem::Version.new(Rails.version)) ? :all : :load
       end
 
-      has_many model.to_s.pluralize.to_sym, options do
+      has_many resources, options do
 
-        def default
-          where(prime: true).limit(1).first
-        end
+        define_method(:default) { where(column_name => true).limit(1)[0] }
 
-        def default=(record)
-          records     = self.send(load_method)
+        define_method(:default=) do |record|
+          records = self.send(load_method)
 
           if records.include?(record)
             ActiveRecord::Base.transaction do
               # Marking existing record as default
-              records.map { |r| r.update_attribute(:prime, false) if r.prime? }
-              record.update_attribute(:prime, true)
+              records.map { |r| r.update_attribute(column_name, false) if
+                r.send(column_name) }
+              record.update_attribute(column_name, true)
             end
           else
             raise ActiveRecord::RecordNotFound, "Record not in collection"
           end
         end
 
-        def << (models)
-          primes      = nil
+        define_method(:<<) do |records|
+          records_on_db = self.send(load_method)
+          none_on_db    = records_on_db.empty?
+          default_on_db = records_on_db.select { |r| r.send(column_name) }
 
-          case models.class.name
+          case records.class.name
           when 'Array'
-            models.first.prime  = true if self.send(load_method).empty? && primes.empty? && !models.blank?
-            primes              = models.select { |m| m.prime? }
-            model               = models.delete(primes.last)
+            # Find out if any default records have been given
+            default_records = records.select do |r|
+              r.send(column_name)
+            end
+
+            # Mark the first record as default iff:
+            # 1. None exist on DB
+            # 2. Given array of records is NOT empty
+            # 3. Given records have no default record marked
+            records[0].send(column_setter, true) if
+              none_on_db &&
+              !records.empty? &&
+              default_records.empty?
+
+            # Candidate default record if none given or none on db
+            default_record = records.delete(default_records[-1])
 
             ActiveRecord::Base.transaction do
-              if model.blank?
-                self.concat(models) unless models.blank?
+              if default_record.blank?
+                self.concat(records) unless records.blank?
               else
-                models.each { |m| m.prime = false }
-                self.where(prime: true).each { |r| r.update_attribute(:prime, false) }
-                self.concat(models + [model])
+                records.each { |r| r.send(column_setter, false) }
+
+                default_on_db.each do |r|
+                  r.update_attribute(column_name, false)
+                end
+
+                self.concat(records + [default_record])
               end
             end
           else
-            unless models.blank?
-              loaded       = !self.send(load_method).empty?
-              models.prime = true unless loaded
+            unless records.blank?
+              records.send(column_setter, true) if default_on_db.blank?
 
               ActiveRecord::Base.transaction do
-                self.where(prime: true).each { |r| r.update_attribute(:prime, false) } if loaded && models.prime?
-                self.concat(models)
+                if records.send(column_name)
+                  default_on_db.map do |r|
+                    r.update_attribute(column_name, false)
+                  end
+                end
+
+                self.concat(records)
               end
             end
           end
