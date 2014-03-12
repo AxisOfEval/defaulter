@@ -4,7 +4,7 @@ module Defaulter
       resource      = model.to_sym
       options       = args.extract_options!
       resources     = resource.to_s.pluralize.to_sym
-      column_name   = options.delete(:default_column) || :prime
+      column_name   = options.delete(:column) || :prime
       column_setter = "#{column_name}=".to_sym
 
       # Unused
