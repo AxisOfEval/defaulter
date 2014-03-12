@@ -1,4 +1,4 @@
-# Defaulter
+# Defaulter [![Gem Version](https://badge.fury.io/rb/defaulter.png)](http://badge.fury.io/rb/defaulter)
 
 Defaulter allows you to mark and maintain default objects in ActiveRecord association collections with minimal code and minimal fuss.
 
