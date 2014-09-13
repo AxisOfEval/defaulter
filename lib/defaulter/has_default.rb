@@ -17,6 +17,8 @@ module Defaulter
           Gem::Version.new(Rails.version)) ? :all : :load
       end
 
+      define_method("default_#{resource.to_s}") { send(resources).default }
+
       has_many resources, options do
 
         define_method(:default) { where(column_name => true).limit(1)[0] }
