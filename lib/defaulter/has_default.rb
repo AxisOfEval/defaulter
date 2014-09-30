@@ -18,6 +18,7 @@ module Defaulter
       end
 
       define_method("default_#{resource.to_s}") { send(resources).default }
+      define_method("default_#{resource.to_s}=") { |record| send(resources).default = record }
 
       has_many resources, options do
 
